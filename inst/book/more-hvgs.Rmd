@@ -34,7 +34,7 @@ extractFromPackage("segerstolpe-pancreas.Rmd", package="OSCA.workflows",
 
 ```{r trend-plot-seger-noweight, fig.cap="Variance in the Segerstolpe pancreas data set as a function of the mean. Each point represents a gene while the lines represent the trend fitted to all genes with default parameters (blue) or without weights (red)."}
 library(scran)
-sce.seger <- sce.seger[,sce.seger$Donor=="HP1507101"]
+sce.seger <- sce.seger[,sce.seger$Donor=="H4"]
 dec.default <- modelGeneVar(sce.seger)
 dec.noweight <- modelGeneVar(sce.seger, density.weights=FALSE)
 
