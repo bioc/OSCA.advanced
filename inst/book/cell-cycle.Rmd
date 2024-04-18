@@ -318,7 +318,7 @@ library(scRNAseq)
 sce.leng <- LengESCData(ensembl=TRUE)
 
 # Performing a default analysis without any removal:
-sce.leng <- logNormCounts(sce.leng, assay.type="normcounts")
+sce.leng <- logNormCounts(sce.leng, assay.type="normalized")
 dec.leng <- modelGeneVar(sce.leng)
 top.hvgs <- getTopHVGs(dec.leng, n=1000)
 sce.leng <- runPCA(sce.leng, subset_row=top.hvgs)
