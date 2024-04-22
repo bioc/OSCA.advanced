@@ -259,7 +259,7 @@ library(scRNAseq)
 hto.sce <- StoeckiusHashingData(type="mixed")
 hto.sce # The full dataset
 altExp(hto.sce) # Contains the HTO counts
-assay(altExp(hto.sce), "counts")[,1:3] # Preview of the count profiles
+counts(altExp(hto.sce))[,1:3] # Preview of the count profiles
 ```
 
 ### Cell calling options
@@ -291,7 +291,7 @@ set.seed(10010)
 
 # Setting lower= for correct knee point detection, 
 # as the coverage in this dataset is particularly low.
-e.out.hto <- emptyDrops(assay(altExp(hto.sce), "counts"), by.rank=12000, lower=10)
+e.out.hto <- emptyDrops(counts(altExp(hto.sce)), by.rank=12000, lower=10)
 summary(is.cell.hto <- e.out.hto$FDR <= 0.001)
 
 par(mfrow=c(1,2))
@@ -330,7 +330,7 @@ This reports the likely sample of origin for each library based on its most abun
 For quality control, it returns the log-fold change between the first and second-most abundant HTOs in each barcode libary (Figure \@ref(fig:hto-1to2-hist)), allowing us to quantify the certainty of each assignment.
 
 ```{r hto-1to2-hist, fig.cap="Distribution of log-fold changes from the first to second-most abundant HTO in each cell."}
-hto.mat <- assay(altExp(hto.sce), "counts")[,which(is.cell)]
+hto.mat <- counts(altExp(hto.sce))[,which(is.cell)]
 hash.stats <- hashedDrops(hto.mat)
 hist(hash.stats$LogFC, xlab="Log fold-change from best to second HTO", main="")
 ```
@@ -372,7 +372,7 @@ e.g., if there are too few cells in the lower mode for accurate estimation of a 
 ```{r hto-ambient2, fig.cap="Proportion of each HTO in the ambient solution for the cell line mixture data, estimated using the bimodal method in `hashedDrops()` or by computing the average abundance across all empty droplets (where the empty state is defined by using `emptyDrops()` on either the genes or the HTO matrix)."}
 estimates <- rbind(
     `Bimodal`=proportions(metadata(hash.stats)$ambient),
-    `Empty (genes)`=proportions(rowSums(assay(altExp(hto.sce), "counts")[,is.na(e.out.gene$FDR)])),
+    `Empty (genes)`=proportions(rowSums(counts(altExp(hto.sce))[,is.na(e.out.gene$FDR)])),
     `Empty (HTO)`=metadata(e.out.hto)$ambient[,1]
 )
 
