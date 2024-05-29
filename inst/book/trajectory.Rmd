@@ -243,7 +243,7 @@ gg
 ```
 
 We can use `slingshotBranchID()` to determine whether a particular cell is shared across multiple curves or is unique to a subset of curves (i.e., is located "after" branching).
-In this case, we can see that most cells jump directly from a global common segment (`1,2,3`) to one of the curves (`1`, `2`, `3`) without any further hierarchy, i.e., no noticeable internal branch points.
+In this case, we can see that most cells jump directly from a global common segment (`1,2,3,4`) to one of the curves (`1`, `2`, `3`, `4`) without any further hierarchy, i.e., no noticeable internal branch points.
 
 ```{r}
 curve.assignments <- slingBranchID(sce.sling2)
@@ -253,8 +253,8 @@ table(curve.assignments)
 ```{r, echo=FALSE}
 # Sanity checks.
 tab <- table(curve.assignments)
-stopifnot(max(tab)==tab["1,2,3"])
-stopifnot(sum(tab[c("1,2,3", "1", "2","3")]) > 0.95)
+stopifnot(max(tab)==tab["1,2,3,4"])
+stopifnot(sum(tab[c("1,2,3,4", "1", "2", "3")]) > 0.95)
 ```
 
 For larger datasets, we can speed up the algorithm by approximating each principal curve with a fixed number of points.
@@ -296,8 +296,8 @@ gg
 
 ```{r, echo=FALSE}
 # Sanity check.
-stopifnot(all(is.na(pseudo.paths4[,1]) | is.na(pseudo.paths4[,3])))
-stopifnot(all(is.na(pseudo.paths4[,2]) | is.na(pseudo.paths4[,3])))
+stopifnot(all(is.na(pseudo.paths4[,1]) | is.na(pseudo.paths4[,4])))
+stopifnot(all(is.na(pseudo.paths4[,2]) | is.na(pseudo.paths4[,4])))
 ```
 
 The use of principal curves adds an extra layer of sophistication that complements the deficiencies of the cluster-based MST.
@@ -335,7 +335,7 @@ i.e., there is some significant trend with respect to pseudotime.
 
 ```{r}
 library(TSCAN)
-pseudo <- testPseudotime(sce.nest, pseudotime=tscan.pseudo[,1])[[1]]
+pseudo <- testPseudotime(sce.nest, pseudotime=tscan.pseudo[,2])[[1]]
 pseudo$SYMBOL <- rowData(sce.nest)$SYMBOL
 pseudo[order(pseudo$p.value),]
 ```
@@ -369,7 +369,7 @@ keep <- colLabels(sce.nest)!=discard
 sce.nest2 <- sce.nest2[,keep]
 
 # Testing against the first path again.
-pseudo <- testPseudotime(sce.nest2, pseudotime=sce.nest2$TSCAN.first)
+pseudo <- testPseudotime(sce.nest2, pseudotime=sce.nest2$TSCAN.second)
 pseudo$SYMBOL <- rowData(sce.nest2)$SYMBOL
 sorted <- pseudo[order(pseudo$p.value),]
 ```
@@ -384,12 +384,12 @@ stopifnot(igraph::degree(pseudo.og$mst, discard)==0)
 Examination of the top downregulated genes suggests that this pseudotime represents a transition away from myeloid identity,
 based on the decrease in expression of genes such as _Mpo_ and _Plac8_ (Figure \@ref(fig:nest-1-simple-down)).
 
-```{r nest-1-simple-down, fig.asp=3, fig.width=6, fig.cap="Expression of the top 10 genes that decrease in expression with increasing pseudotime along the first path in the MST of the Nestorowa dataset. Each point represents a cell that is mapped to this path and is colored by the assigned cluster."}
+```{r nest-1-simple-down, fig.asp=3, fig.width=6, fig.cap="Expression of the top 10 genes that decrease in expression with increasing pseudotime along the second path in the MST of the Nestorowa dataset. Each point represents a cell that is mapped to this path and is colored by the assigned cluster."}
 up.left <- sorted[sorted$logFC < 0,]
 head(up.left, 10)
 best <- head(up.left$SYMBOL, 10)
 plotExpression(sce.nest2, features=best, swap_rownames="SYMBOL",
-    x="TSCAN.first", colour_by="label")
+    x="TSCAN.second", colour_by="label")
 ```
 
 ```{r, echo=FALSE, results="hide"}
@@ -400,12 +400,12 @@ Conversely, the later parts of the pseudotime may correspond to a more stem-like
 There is also increased expression of genes associated with the lymphoid lineage (e.g., _Ltb_),
 consistent with reduced commitment to the myeloid lineage at earlier pseudotime values. 
 
-```{r nest-1-simple-up, fig.asp=3, fig.width=6, fig.cap="Expression of the top 10 genes that increase in expression with increasing pseudotime along the first path in the MST of the Nestorowa dataset. Each point represents a cell that is mapped to this path and is colored by the assigned cluster."}
+```{r nest-1-simple-up, fig.asp=3, fig.width=6, fig.cap="Expression of the top 10 genes that increase in expression with increasing pseudotime along the second path in the MST of the Nestorowa dataset. Each point represents a cell that is mapped to this path and is colored by the assigned cluster."}
 up.right <- sorted[sorted$logFC > 0,]
 head(up.right, 10)
 best <- head(up.right$SYMBOL, 10)
 plotExpression(sce.nest2, features=best, swap_rownames="SYMBOL",
-    x="TSCAN.first", colour_by="label")
+    x="TSCAN.second", colour_by="label")
 ```
 
 ```{r, echo=FALSE, results="hide"}
@@ -423,9 +423,9 @@ stopifnot(all(c("Hlf", "Ltb") %in% head(up.right$SYMBOL, 10)))
 
 Alternatively, a heatmap can be used to provide a more compact visualization (Figure \@ref(fig:nest-1-simple-up-heat)).
 
-```{r nest-1-simple-up-heat, fig.width=6, fig.height=7, fig.cap="Heatmap of the expression of the top 50 genes that increase in expression with increasing pseudotime along the first path in the MST of the Nestorowa HSC dataset. Each column represents a cell that is mapped to this path and is ordered by its pseudotime value."}
-on.first.path <- !is.na(sce.nest2$TSCAN.first)
-plotHeatmap(sce.nest2[,on.first.path], order_columns_by="TSCAN.first", 
+```{r nest-1-simple-up-heat, fig.width=6, fig.height=7, fig.cap="Heatmap of the expression of the top 50 genes that increase in expression with increasing pseudotime along the second path in the MST of the Nestorowa HSC dataset. Each column represents a cell that is mapped to this path and is ordered by its pseudotime value."}
+on.second.path <- !is.na(sce.nest2$TSCAN.first)
+plotHeatmap(sce.nest2[,on.second.path], order_columns_by="TSCAN.second", 
     colour_columns_by="label", features=head(up.right$SYMBOL, 50),
     center=TRUE, swap_rownames="SYMBOL")
 ```
@@ -465,12 +465,12 @@ To demonstrate, we focus on the cluster containing the branch point in the Nesto
 We recompute the pseudotimes so that the root lies at the cluster center, allowing us to detect genes that are associated with the divergence of the branches.
 
 ```{r}
-starter <- "3"
+starter <- "2"
 tscan.pseudo2 <- orderCells(map.tscan, mst, start=starter)
 ```
 
 ```{r, echo=FALSE}
-stopifnot(igraph::degree(mst, starter) == 3)
+stopifnot(igraph::degree(mst, starter) == 4)
 ```
 
 We visualize the reordered pseudotimes using only the cells in our branch point cluster (Figure \@ref(fig:nest-pseudo-reordered)), which allows us to see the correspondence between each pseudotime to the projected edges of the MST.
@@ -488,7 +488,7 @@ keep <- colLabels(sce.nest) == starter
 sub.nest <- sub.nest[,keep]
 
 # Showing only the lines to/from our cluster of interest.
-line.data.sub <- line.data[grepl("^3--", line.data$edge) | grepl("--3$", line.data$edge),]
+line.data.sub <- line.data[grepl("^2--", line.data$edge) | grepl("--2$", line.data$edge),]
 ggline <- geom_line(data=line.data.sub, mapping=aes(x=TSNE1, y=TSNE2, group=edge))
 
 gridExtra::grid.arrange(
@@ -632,7 +632,7 @@ However, when such prior biological knowledge is not available, we can fall back
 The assumption is that terminally differentiated cells have expression profiles that are highly specialized for their function while multipotent cells have no such constraints - and indeed, may need to have active expression programs for many lineages in preparation for commitment to any of them.
 
 ```{r, echo=FALSE}
-lowest <- c("5", "8")
+lowest <- c("4", "10")
 low.text <- paste(paste(head(lowest, -1), collapse=", "), "and", tail(lowest, 1))
 ```
 
