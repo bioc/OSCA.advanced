@@ -339,7 +339,7 @@ This can be easily achieved by running `runPCA()` without passing in a vector of
 
 ```{r}
 library(scRNAseq)
-sce.kotliarov <- KotliarovPBMCData()
+adt.kotliarov <- KotliarovPBMCData(mode = "adt")
 adt.kotliarov
 
 # QC.
